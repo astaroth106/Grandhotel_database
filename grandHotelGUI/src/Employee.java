@@ -1,0 +1,183 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
+import com.mysql.jdbc.PreparedStatement;
+
+public class Employee {
+	
+	private JFrame window = new JFrame("Warning");
+	public Object[][] data;
+	private String username;
+	private String password;
+	
+	public Employee(int n, String user, String pass) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+	{
+		data = new Object[n][4];
+		final int WINDOW_WIDTH = 350, WINDOW_HEIGHT = 200;
+		window.setSize(WINDOW_WIDTH,WINDOW_HEIGHT);
+		window.setLayout(null);
+		username = user;
+		password = pass;
+	}
+	public boolean getEmployee(String Employee, String pass) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException 
+	{
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
+		Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/GrandHotel", Employee, pass);
+		Statement statement = connection.createStatement();
+	
+			String query = "select empNo from Employee where empNo= '"+Employee+"';";
+			ResultSet rs = statement.executeQuery(query);
+			
+			if(rs.next())
+				return true;
+			else if(Employee.equals("admin") || Employee.equals("root"))
+				return true;
+			else
+			{
+				JLabel messageLabel1 = new JLabel("Incorrect Username or password");
+				messageLabel1.setSize(200, 30);
+				messageLabel1.setLocation(50, 50);
+				window.add(messageLabel1);
+				window.setVisible(true);
+				return false;
+			}	
+		
+	}
+	public Object[][] getTable0(String Employee, String pass) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+	{
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
+		Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/GrandHotel", Employee, pass);
+		Statement statement = connection.createStatement();
+		String query = "select * from Employee";
+		ResultSet rs = statement.executeQuery(query);
+
+		
+		int count=0;
+		while(rs.next())
+		{
+			data[count][0] = rs.getString("empNo");
+			data[count][1] = rs.getString("fName");
+			data[count][2] = rs.getString("lName");
+			data[count][3] = rs.getString("position");
+			count++;
+		}
+		connection.close();
+		return data;
+	}
+	
+	public Object[][] getTable1(String empNo, String fName, String lName, String position) 
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+	{
+		String str = null, str2 = null; 
+		
+		if(!empNo.equals(""))
+		{
+			str = "empNo"; str2 = empNo;
+		}
+		if(!fName.equals(""))
+		{
+			str = "fName";str2 = fName;
+		}
+		if(!lName.equals(""))
+		{
+			str = "lName";str2 = lName;
+		}
+		if(!position.equals(""))
+		{	
+			str = "position";str2 = position;
+		}
+		
+		
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
+		Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/GrandHotel",username, password);
+		Statement statement = connection.createStatement();
+		ResultSet rs = statement.executeQuery("select * from Employee where "+str +"= '"+str2+"'"); 
+		Object[][] data = new Object[200][5];
+		int count=0;
+		while(rs.next())
+		{
+			data[count][0] = rs.getString("empNo");
+			data[count][1] = rs.getString("fName");
+			data[count][2] = rs.getString("lName");
+			data[count][3] = rs.getString("position");
+			count++;
+		}
+		if(count == 0)
+		{
+			JLabel messageLabel1 = new JLabel("No Results found");
+			messageLabel1.setSize(100, 30);
+			messageLabel1.setLocation(50, 50);
+			window.add(messageLabel1);
+			window.setVisible(true);
+		}
+		connection.close();
+		return data;
+	}
+	
+	public void Update(String empNo, String fName, String lName, String position) 
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+	{
+		if(empNo.equals(""))
+		{
+			JLabel messageLabel1 = new JLabel("Missing empNo");
+			messageLabel1.setSize(100, 30);
+			messageLabel1.setLocation(50, 50);
+			window.add(messageLabel1);
+			window.setVisible(true);
+		}
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
+		Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/GrandHotel",username, password);
+		Statement statement = null;
+		String query = "Update Employee Set empNo= '"+ empNo+"'";
+
+			if(!fName.equals(""))
+				query = query + ",fName= '"+fName+"'";
+			if(!lName.equals(""))
+				query = query + ",lName= '"+lName+"'";
+			if(!position.equals(""))
+				query = query + ",position= '"+position+"'";
+		
+		query = query +"where empNo = '"+empNo+"';";
+		System.out.print(query);
+		statement.executeUpdate(query);
+		
+		connection.close();
+	}
+	
+	public void Add(String empNo, String fName, String lName, String position) 
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+	{
+		if(empNo.equals(""))
+		{
+			JLabel messageLabel1 = new JLabel("Missing data");
+			messageLabel1.setSize(100, 30);
+			messageLabel1.setLocation(50, 50);
+			window.add(messageLabel1);
+			window.setVisible(true);
+		}
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
+		Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/GrandHotel",username, password);
+		Statement statement = connection.createStatement();
+		String query = "INSERT INTO Employee VALUES('"+empNo+"', '"+fName+"', '"+lName+"',' "+position+"');";
+		statement.executeUpdate(query);
+		
+		connection.close();	
+	}
+	public void Delete(String empNo) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+	{
+		Class.forName("com.mysql.jdbc.Driver").newInstance();
+		Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/GrandHotel",username, password);
+		Statement statement = connection.createStatement();
+		String query = "delete from Employee where empNo= '"+empNo+"'";
+		statement.executeUpdate(query);
+		
+		connection.close();
+	}
+
+}
